@@ -52,7 +52,7 @@ do
   completion+="\n  $fullCommand)"
   completion+="\n    _command_args=("
 
-  delimitedFlags=$(jq -r '. | select((.command == "'$command'") and (.topic == "'$topic'")) | .flags | .[] | .name + "\t" + .description + "\t" + .type + "\t" + .char' commands-display.json)
+  delimitedFlags=$(jq -r '. | select((.command == "'$command'") and (.topic == "'$topic'")) | .flags | .[] | .name + "\t" + .description + "\t" + .type + "\t" + (.hasValue | tostring) + "\t" + .char' commands-display.json)
   
   # create the array based on newlines
   IFS=$'\n'
@@ -67,12 +67,15 @@ do
     flagName=${flagArray2[0]}
     flagDescription=${flagArray2[1]}
     flagType=${flagArray2[2]}
-    flagChar=${flagArray2[3]}
+    hasValue=${flagArray2[3]}
+    flagChar=${flagArray2[4]}
 
-    includeFiles=""
+    includeArguments=""
 
     if [ "$flagType" == "file" ] || [ "$flagType" == "filepath" ] || [ "$flagType" == "directory" ]; then
-      includeFiles=":file:_files"      
+      includeArguments=":file:_files"
+    elif [ "$hasValue" == "true" ]; then
+      includeArguments=":"
     fi
 
     # escape braces
@@ -82,9 +85,9 @@ do
     # different format if there's not a single character arg
     if [ "$flagChar" != "" ]
     then
-      completion+="\n      '(-"$flagChar"|--"$flagName")'{-"$flagChar",--"$flagName"}'["$flagDescription"]$includeFiles' \\\\"
+      completion+="\n      {-"$flagChar",--"$flagName"}'["$flagDescription"]$includeArguments' \\\\"
     else
-      completion+="\n      '(--"$flagName")--"$flagName"["$flagDescription"]$includeFiles' \\\\"
+      completion+="\n      --"$flagName"'["$flagDescription"]$includeArguments' \\\\"
     fi
 
   done
