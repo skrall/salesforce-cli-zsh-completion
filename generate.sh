@@ -52,7 +52,7 @@ do
   completion+="\n  $fullCommand)"
   completion+="\n    _command_args=("
 
-  delimitedFlags=$(jq -r '. | select((.command == "'$command'") and (.topic == "'$topic'")) | .flags | .[] | .name + "\t" + .description + "\t" + .type + "\t" + (.hasValue | tostring) + "\t" + .char' commands-display.json)
+  delimitedFlags=$(jq -r '. | select((.command == "'$command'") and (.topic == "'$topic'")) | .flags | .[] | .name + "\t" + .description + "\t" + .type + "\t" + (.hasValue | tostring) + "\t" + (.char // "none") + "\t" + (.values // [] | @csv)' commands-display.json)
   
   # create the array based on newlines
   IFS=$'\n'
@@ -69,11 +69,20 @@ do
     flagType=${flagArray2[2]}
     hasValue=${flagArray2[3]}
     flagChar=${flagArray2[4]}
+    valuesArray=${flagArray2[5]//","/" "} # Replace the commas with spaces.
 
     includeArguments=""
 
-    if [ "$flagType" == "file" ] || [ "$flagType" == "filepath" ] || [ "$flagType" == "directory" ]; then
-      includeArguments=":file:_files"
+    if [ "$flagType" == "file" ] || [ "$flagType" == "filepath" ]; then
+      includeArguments=":file:_files"  
+    elif [ "$hasValue" == "true" ] && [ "$valuesArray" != "" ] && [ "$flagName" == "triggerevents" ]; then
+      includeArguments=":$flagName:_values -s , $flagName $valuesArray"
+    elif [ "$flagType" == "directory" ]; then  
+      includeArguments=":$flagName:_path_files -/"
+    elif [ "$hasValue" == "true" ] && [ "$valuesArray" == "" ] && [ "$flagName" == "outputdir" ]; then # Seems like sfdx shold be updated to report type of directory for these
+      includeArguments=":$flagName:_path_files -/"
+    elif [ "$hasValue" == "true" ] && [ "$valuesArray" != "" ]; then
+      includeArguments=":$flagName:_values $flagName $valuesArray"
     elif [ "$hasValue" == "true" ]; then
       includeArguments=":"
     fi
@@ -83,7 +92,7 @@ do
     flagDescription=$(echo $flagDescription | sed -e "s/\]/\\\]/g")
 
     # different format if there's not a single character arg
-    if [ "$flagChar" != "" ]
+    if [ "$flagChar" != "none" ]
     then
       completion+="\n      {-"$flagChar",--"$flagName"}'["$flagDescription"]$includeArguments' \\\\"
     else
