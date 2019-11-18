@@ -24,8 +24,11 @@ commands=""
 while read name description
 do
   name="$(echo $name | sed -e 's/:/\\:/g')"
+#  description="$(echo $description | sed -e $'s/\'//g')"
+  description="$(echo $description | tr -d \'\(\))"
+  echo "Description: $description"
   commands="${commands}\n\t\"$name\":\"$description\""
-done <<< "$(jq -r 'to_entries[] | "\(.value.name)\t\(.value.description)"' commands-list.json)"
+done <<< "$(jq -r 'to_entries[] | "\(.value.name)\t\(.value.description | split("\n")[0])"' commands-list.json)"
 
 completion+=$commands
 completion+="\n)"
@@ -90,6 +93,10 @@ do
     # escape braces
     flagDescription=$(echo $flagDescription | sed -e "s/\[/\\\[/g")
     flagDescription=$(echo $flagDescription | sed -e "s/\]/\\\]/g")
+    flagDescription=$(echo $flagDescription | sed -e "s/[(]/\\\(/g")
+    flagDescription=$(echo $flagDescription | sed -e "s/[)]/\\\)/g")
+    flagDescription=$(echo $flagDescription | sed -e "s/\'/'\\\''/g")
+    flagDescription=$(echo $flagDescription | sed -e "s/\|/\\\|/g")
 
     # different format if there's not a single character arg
     if [ "$flagChar" != "none" ]

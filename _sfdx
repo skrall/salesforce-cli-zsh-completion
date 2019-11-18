@@ -12,13 +12,15 @@ _1st_arguments=(
 	"force\:alias\:set":"set username aliases for the Salesforce CLI"
 	"force\:apex\:class\:create":"create an Apex class"
 	"force\:apex\:execute":"execute anonymous Apex code"
-	"force\:apex\:log\:get":"fetch a debug log"
+	"force\:apex\:log\:get":"fetch the last debug log"
 	"force\:apex\:log\:list":"list debug logs"
 	"force\:apex\:log\:tail":"start debug logging and display logs"
 	"force\:apex\:test\:report":"display test results"
 	"force\:apex\:test\:run":"invoke Apex tests"
 	"force\:apex\:trigger\:create":"create an Apex trigger"
+	"force\:auth\:device\:login":"authorize an org using a device code"
 	"force\:auth\:jwt\:grant":"authorize an org using the JWT flow"
+	"force\:auth\:list":"list auth connection information"
 	"force\:auth\:logout":"log out from authorized orgs"
 	"force\:auth\:sfdxurl\:store":"authorize an org using an SFDX auth URL"
 	"force\:auth\:web\:login":"authorize an org using the web login flow"
@@ -38,22 +40,26 @@ _1st_arguments=(
 	"force\:doc\:commands\:display":"display help for force commands"
 	"force\:doc\:commands\:list":"list the force commands"
 	"force\:lightning\:app\:create":"create a Lightning app"
-	"force\:lightning\:component\:create":"create a Lightning component"
+	"force\:lightning\:component\:create":"create a bundle for an Aura component or a Lightning web component"
 	"force\:lightning\:event\:create":"create a Lightning event"
 	"force\:lightning\:interface\:create":"create a Lightning interface"
-	"force\:lightning\:lint":"analyse (lint) Lightning component code"
+	"force\:lightning\:lint":"analyze lint Aura component code"
+	"force\:lightning\:lwc\:start":"Develop Lightning Web Component modules and see live changes without publishing your components to an org."
 	"force\:lightning\:test\:create":"create a Lightning test"
 	"force\:lightning\:test\:install":"install Lightning Testing Service unmanaged package in your org"
-	"force\:lightning\:test\:run":"invoke Lightning component tests"
+	"force\:lightning\:test\:run":"invoke Aura component tests"
 	"force\:limits\:api\:display":"display current org’s limits"
 	"force\:mdapi\:convert":"convert metadata from the Metadata API format into the source format"
 	"force\:mdapi\:deploy":"deploy metadata to an org using Metadata API"
 	"force\:mdapi\:deploy\:cancel":"cancel a metadata deployment"
 	"force\:mdapi\:deploy\:report":"check the status of a metadata deployment"
+	"force\:mdapi\:describemetadata":"display the metadata types enabled for your org"
+	"force\:mdapi\:listmetadata":"display properties of metadata components of a specified type"
 	"force\:mdapi\:retrieve":"retrieve metadata from an org using Metadata API"
 	"force\:mdapi\:retrieve\:report":"check the status of a metadata retrieval"
-	"force\:org\:create":"create a scratch org"
-	"force\:org\:delete":"mark a scratch org for deletion"
+	"force\:org\:clone":"clone a sandbox org"
+	"force\:org\:create":"create a scratch or sandbox org"
+	"force\:org\:delete":"mark a scratch or sandbox org for deletion"
 	"force\:org\:display":"get org description"
 	"force\:org\:list":"list all orgs you’ve created or authenticated to"
 	"force\:org\:open":"open an org in your browser"
@@ -64,11 +70,15 @@ _1st_arguments=(
 	"force\:org\:snapshot\:delete":"delete a scratch org snapshot"
 	"force\:org\:snapshot\:get":"get details about a scratch org snapshot"
 	"force\:org\:snapshot\:list":"list scratch org snapshots"
+	"force\:org\:status":"report sandbox org creation status and authenticate to org"
 	"force\:package1\:version\:create":"create a first-generation package version in the release org"
 	"force\:package1\:version\:create\:get":"retrieve the status of a package version creation request"
 	"force\:package1\:version\:display":"display details about a first-generation package version"
 	"force\:package1\:version\:list":"list package versions for the specified first-generation package or for the org"
 	"force\:package\:create":"create a package"
+	"force\:package\:hammertest\:list":"list the statuses of running and completed ISV Hammer tests"
+	"force\:package\:hammertest\:report":"display the status or results of a ISV Hammer test"
+	"force\:package\:hammertest\:run":"run ISV Hammer"
 	"force\:package\:install":"install a package in the target org"
 	"force\:package\:install\:report":"retrieve the status of a package installation request"
 	"force\:package\:installed\:list":"list the org’s installed packages"
@@ -83,17 +93,19 @@ _1st_arguments=(
 	"force\:package\:version\:promote":"promote a package version to released"
 	"force\:package\:version\:report":"retrieve details about a package version in the Dev Hub org"
 	"force\:package\:version\:update":"update a package version"
-	"force\:project\:create":"create a new SFDX project"
+	"force\:project\:create":"create a Salesforce DX project"
 	"force\:project\:upgrade":"update project config files to the latest format"
 	"force\:schema\:sobject\:describe":"describe an object"
 	"force\:schema\:sobject\:list":"list all objects of a specified category"
 	"force\:source\:convert":"convert source into Metadata API format"
 	"force\:source\:delete":"delete source from your project and from a non-source-tracked org"
-	"force\:source\:deploy":"deploy source to a non-source-tracked org"
+	"force\:source\:deploy":"deploy source to an org"
+	"force\:source\:deploy\:cancel":"cancel a source deployment"
+	"force\:source\:deploy\:report":"check the status of a metadata deployment"
 	"force\:source\:open":"edit a Lightning Page with Lightning App Builder"
 	"force\:source\:pull":"pull source from the scratch org to the project"
 	"force\:source\:push":"push source to a scratch org from the project"
-	"force\:source\:retrieve":"retrieve source from a non-source-tracked org"
+	"force\:source\:retrieve":"retrieve source from an org"
 	"force\:source\:status":"list local changes and/or changes in a scratch org"
 	"force\:user\:create":"create a user for a scratch org"
 	"force\:user\:display":"displays information about a user of a scratch org"
@@ -113,958 +125,1177 @@ fi
 
 local -a _command_args
 case "$words[1]" in
- force:limits:api:display)
- _command_args=(
- {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:lightning:app:create)
- _command_args=(
- {-n,--appname}'[name of the generated Lightning app]:' \
- {-t,--template}'[template to use for file creation (DefaultLightningApp*)]:template:_values template "DefaultLightningApp"' \
- {-d,--outputdir}'[folder for saving the created files]:outputdir:_path_files -/' \
- {-r,--reflect}'[switch to return flag detailed information]' \
- {-a,--apiversion}'[API version number (44.0*,43.0)]:apiversion:_values apiversion "44.0" "43.0"' \
- --json'[JSON output]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:data:bulk:delete)
- _command_args=(
- {-s,--sobjecttype}'[the sObject type of the records you’re deleting]:' \
- {-f,--csvfile}'[the path to the CSV file containing the ids of the records to delete]:file:_files' \
- {-w,--wait}'[the number of minutes to wait for the command to complete before displaying the results]:' \
- {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:data:bulk:status)
- _command_args=(
- {-i,--jobid}'[the ID of the job you want to view or of the job whose batch you want to view]:' \
- {-b,--batchid}'[the ID of the batch whose status you want to view]:' \
- {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:data:bulk:upsert)
- _command_args=(
- {-s,--sobjecttype}'[the sObject type of the records you want to upsert]:' \
- {-f,--csvfile}'[the path to the CSV file that defines the records to upsert]:file:_files' \
- {-i,--externalid}'[the column name of the external ID]:' \
- {-w,--wait}'[the number of minutes to wait for the command to complete before displaying the results]:' \
- {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:apex:class:create)
- _command_args=(
- {-n,--classname}'[name of the generated Apex class]:' \
- {-t,--template}'[template to use for file creation (DefaultApexClass*,ApexException,ApexUnitTest,InboundEmailService)]:template:_values template "DefaultApexClass" "ApexException" "ApexUnitTest" "InboundEmailService"' \
- {-d,--outputdir}'[folder for saving the created files]:outputdir:_path_files -/' \
- {-r,--reflect}'[switch to return flag detailed information]' \
- {-a,--apiversion}'[API version number (44.0*,43.0)]:apiversion:_values apiversion "44.0" "43.0"' \
- --json'[JSON output]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:doc:commands:display)
+ force:)
  _command_args=(
  --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:doc:commands:list)
- _command_args=(
- {-u,--usage}'[list only docopt usage strings]' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:visualforce:component:create)
- _command_args=(
- {-t,--template}'[template to use for file creation (DefaultVFComponent*)]:template:_values template "DefaultVFComponent"' \
- {-d,--outputdir}'[folder for saving the created files]:outputdir:_path_files -/' \
- {-r,--reflect}'[switch to return flag detailed information]' \
- {-n,--componentname}'[name of the generated Visualforce component]:' \
- {-a,--apiversion}'[API version number (44.0*,43.0)]:apiversion:_values apiversion "44.0" "43.0"' \
- {-l,--label}'[Visualforce component label]:' \
- --json'[JSON output]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:lightning:component:create)
- _command_args=(
- {-n,--componentname}'[name of the generated Lightning component]:' \
- {-t,--template}'[template to use for file creation (DefaultLightningCmp*)]:template:_values template "DefaultLightningCmp"' \
- {-d,--outputdir}'[folder for saving the created files]:outputdir:_path_files -/' \
- {-r,--reflect}'[switch to return flag detailed information]' \
- {-a,--apiversion}'[API version number (44.0*,43.0)]:apiversion:_values apiversion "44.0" "43.0"' \
- --type'[type of the Lightning component (aura*,lwc)]:type:_values type "aura" "lwc"' \
- --json'[JSON output]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:mdapi:convert)
- _command_args=(
- {-r,--rootdir}'[the root directory containing the Metadata API–formatted metadata]:rootdir:_path_files -/' \
- {-d,--outputdir}'[the output directory to store the source–formatted files]:outputdir:_path_files -/' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:source:convert)
- _command_args=(
- {-r,--rootdir}'[a source directory other than the default package to convert]:rootdir:_path_files -/' \
- {-d,--outputdir}'[output directory to store the Metadata API–formatted files in]:outputdir:_path_files -/' \
- {-n,--packagename}'[name of the package to associate with the metadata-formatted files]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:org:create)
- _command_args=(
- {-f,--definitionfile}'[path to a scratch org definition file]:file:_files' \
- {-j,--definitionjson}'[scratch org definition in json format ]:' \
- {-n,--nonamespace}'[creates the scratch org with no namespace]' \
- {-c,--noancestors}'[do not include second-generation package ancestors in the scratch org]' \
- {-i,--clientid}'[connected app consumer key]:' \
- {-s,--setdefaultusername}'[set the created org as the default username]' \
- {-a,--setalias}'[set an alias for for the created scratch org]:' \
- {-e,--env}'[environment where the scratch org is created: \[sandbox*,virtual,prototype\] (sandbox*,virtual,prototype)]:env:_values env "sandbox*" "virtual" "prototype"' \
- {-w,--wait}'[the streaming client socket timeout (in minutes) (default:6, min:2)]:' \
- {-d,--durationdays}'[duration of the scratch org (in days) (default:7, min:1, max:30)]:' \
- {-v,--targetdevhubusername}'[username or alias for the dev hub org; overrides default dev hub org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:package:create)
- _command_args=(
- {-n,--name}'[package name]:' \
- {-t,--packagetype}'[package type (Managed,Unlocked)]:packagetype:_values packagetype "Managed" "Unlocked"' \
- {-d,--description}'[package description]:' \
- {-e,--nonamespace}'[creates the package with no namespace; available only for unlocked packages.]' \
- {-r,--path}'[path to directory that contains the contents of the package]:path:_path_files -/' \
- {-v,--targetdevhubusername}'[username or alias for the dev hub org; overrides default dev hub org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:user:create)
- _command_args=(
- {-f,--definitionfile}'[file path to a user definition]:file:_files' \
- {-a,--setalias}'[set an alias for the created username to reference within the CLI]:' \
- {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
- {-v,--targetdevhubusername}'[username or alias for the dev hub org; overrides default dev hub org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:project:create)
- _command_args=(
- {-n,--projectname}'[name of the generated project]:' \
- {-t,--template}'[template to use for file creation (Defaultsfdx-project.json*)]:template:_values template "Defaultsfdx-project.json"' \
- {-d,--outputdir}'[folder for saving the created files]:outputdir:_path_files -/' \
- {-r,--reflect}'[switch to return flag detailed information]' \
- {-l,--loginurl}'[Salesforce instance login URL (https://login.salesforce.com*)]:' \
- --sourceapiversion'[source API version number (44.0*)]' \
- {-s,--namespace}'[project associated namespace]:' \
- {-p,--defaultpackagedir}'[default package directory name (force-app*)]:' \
- {-x,--manifest}'[generate a manifest (package.xml) for change-set-based development]' \
- --json'[JSON output]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:org:delete)
- _command_args=(
- {-p,--noprompt}'[no prompt to confirm deletion]' \
- {-u,--targetusername}'[username or alias for the target org]:' \
- {-v,--targetdevhubusername}'[username or alias for the dev hub org; overrides default dev hub org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:source:delete)
- _command_args=(
- {-r,--noprompt}'[do not prompt for delete confirmation]' \
- {-w,--wait}'[wait time for command to finish in minutes (default: 33) (default:33, min:1)]:' \
- {-p,--sourcepath}'[comma-separated list of paths to the local metadata to delete]:file:_files' \
- {-m,--metadata}'[comma-separated list of names of metadata components to delete]:' \
- {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:mdapi:deploy)
- _command_args=(
- {-c,--checkonly}'[validate deploy but don’t save to the org (default:false)]' \
- {-d,--deploydir}'[root of directory tree of files to deploy]:deploydir:_path_files -/' \
- {-w,--wait}'[wait time for command to finish in minutes (default: 0)]:' \
- {-i,--jobid}'[(deprecated) job ID of the deployment you want to check; defaults to your most recent CLI deployment if not specified]:' \
- {-l,--testlevel}'[deployment testing level (NoTestRun,RunSpecifiedTests,RunLocalTests,RunAllTestsInOrg)]:testlevel:_values testlevel "NoTestRun" "RunSpecifiedTests" "RunLocalTests" "RunAllTestsInOrg"' \
- {-r,--runtests}'[tests to run if --testlevel RunSpecifiedTests]:' \
- {-e,--rollbackonerror}'[(deprecated) roll back deployment for any failure (default:true)]:' \
- {-o,--ignoreerrors}'[ignore any errors and do not roll back deployment (default:false)]' \
- {-g,--ignorewarnings}'[whether a warning will allow a deployment to complete successfully (default:false)]' \
- {-f,--zipfile}'[path to .zip file of metadata to deploy]:file:_files' \
- {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- --verbose'[verbose output of deploy results]' \
- )
- ;;
- force:source:deploy)
- _command_args=(
- {-w,--wait}'[wait time for command to finish in minutes (default: 33) (default:33, min:1)]:' \
- {-m,--metadata}'[comma-separated list of metadata component names]:' \
- {-p,--sourcepath}'[comma-separated list of paths to the local source files to deploy]:file:_files' \
- {-x,--manifest}'[file path for manifest (package.xml) of components to deploy]:file:_files' \
- {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:mdapi:deploy:cancel)
- _command_args=(
- {-w,--wait}'[wait time for command to finish in minutes (default: 33) (default:33, min:1)]:' \
- {-i,--jobid}'[job ID of the deployment you want to cancel; defaults to your most recent CLI deployment if not specified]:' \
- {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:mdapi:deploy:report)
- _command_args=(
- {-w,--wait}'[wait time for command to finish in minutes (default: 0)]:' \
- {-i,--jobid}'[job ID of the deployment you want to check; defaults to your most recent CLI deployment if not specified]:' \
- {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- --verbose'[verbose output of deploy results]' \
- )
- ;;
- force:org:display)
- _command_args=(
- {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- --verbose'[emit additional command output to stdout]' \
- )
- ;;
- force:user:display)
- _command_args=(
- {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
- {-v,--targetdevhubusername}'[username or alias for the dev hub org; overrides default dev hub org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:lightning:event:create)
- _command_args=(
- {-n,--eventname}'[name of the generated Lightning event]:' \
- {-t,--template}'[template to use for file creation (DefaultLightningEvt*)]:template:_values template "DefaultLightningEvt"' \
- {-d,--outputdir}'[folder for saving the created files]:outputdir:_path_files -/' \
- {-r,--reflect}'[switch to return flag detailed information]' \
- {-a,--apiversion}'[API version number (44.0*,43.0)]:apiversion:_values apiversion "44.0" "43.0"' \
- --json'[JSON output]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:apex:execute)
- _command_args=(
- {-f,--apexcodefile}'[path to a local file containing Apex code]:file:_files' \
- {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:config:get)
- _command_args=(
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- --verbose'[emit additional command output to stdout]' \
- )
- ;;
- force:package:install)
- _command_args=(
- {-w,--wait}'[number of minutes to wait for installation status]:' \
- {-k,--installationkey}'[installation key for key-protected package (default: null)]:' \
- {-b,--publishwait}'[number of minutes to wait for subscriber package version ID to become available in the target org ]:' \
- {-r,--noprompt}'[allow Remote Site Settings and Content Security Policy websites to send or receive data without confirmation]' \
- {-p,--package}'[ID (starts with 04t) or alias of the package version to install]:' \
- {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:package:install:report)
- _command_args=(
- {-i,--requestid}'[ID of the package install request you want to check]:' \
- {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:package:installed:list)
- _command_args=(
- {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:lightning:interface:create)
- _command_args=(
- {-n,--interfacename}'[name of the generated Lightning interface]:' \
- {-t,--template}'[template to use for file creation (DefaultLightningIntf*)]:template:_values template "DefaultLightningIntf"' \
- {-d,--outputdir}'[folder for saving the created files]:outputdir:_path_files -/' \
- {-r,--reflect}'[switch to return flag detailed information]' \
- {-a,--apiversion}'[API version number (44.0*,43.0)]:apiversion:_values apiversion "44.0" "43.0"' \
- --json'[JSON output]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:auth:jwt:grant)
- _command_args=(
- {-u,--username}'[authentication username]:' \
- {-f,--jwtkeyfile}'[path to a file containing the private key]:file:_files' \
- {-i,--clientid}'[OAuth client ID (sometimes called the consumer key)]:' \
- {-r,--instanceurl}'[the login URL of the instance the org lives on]:' \
- {-d,--setdefaultdevhubusername}'[set the authenticated org as the default dev hub org for scratch org creation]' \
- {-s,--setdefaultusername}'[set the authenticated org as the default username that all commands run against]' \
- {-a,--setalias}'[set an alias for the authenticated org]:' \
- {-p,--noprompt}'[do not prompt for auth confirmation in demo mode]' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:lightning:lint)
- _command_args=(
- {-,--ignore}'[pattern used to ignore some folders]' \
- {-,--files}'[pattern used to include specific files]' \
- {-,--json}'[format output as JSON]' \
- {-,--config}'[path to a custom ESLint configuration file]' \
- {-,--verbose}'[report warnings in addition to errors]' \
- {-,--exit}'[exit with error code 1 if there are lint issues]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
  )
  ;;
  force:alias:list)
  _command_args=(
  --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:config:list)
- _command_args=(
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:org:list)
- _command_args=(
- --all'[include expired, deleted, and unknown-status scratch orgs]' \
- --clean'[remove all local org authorizations for non-active orgs]' \
- {-p,--noprompt}'[do not prompt for confirmation]' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- --verbose'[list more information about each org]' \
- )
- ;;
- force:package:list)
- _command_args=(
- {-v,--targetdevhubusername}'[username or alias for the dev hub org; overrides default dev hub org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- --verbose'[display extended package detail]' \
- )
- ;;
- force:user:list)
- _command_args=(
- {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
- {-v,--targetdevhubusername}'[username or alias for the dev hub org; overrides default dev hub org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:apex:log:get)
- _command_args=(
- {-c,--color}'[colorize noteworthy log lines]' \
- {-i,--logid}'[ID of the log to display]:' \
- {-n,--number}'[number of most recent logs to display (min:1, max:25)]:' \
- {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:apex:log:list)
- _command_args=(
- {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:apex:log:tail)
- _command_args=(
- {-c,--color}'[colorize noteworthy log lines]' \
- {-d,--debuglevel}'[debug level for trace flag]:' \
- {-s,--skiptraceflag}'[skip trace flag setup]' \
- {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:auth:logout)
- _command_args=(
- {-a,--all}'[include all authenticated orgs]' \
- {-p,--noprompt}'[do not prompt for confirmation]' \
- {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:org:open)
- _command_args=(
- {-p,--path}'[navigation URL path]:' \
- {-r,--urlonly}'[display navigation URL, but don’t launch browser]' \
- {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:source:open)
- _command_args=(
- {-f,--sourcefile}'[file to edit]:file:_files' \
- {-r,--urlonly}'[generate a navigation URL; don’t launch the editor]' \
- {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:visualforce:page:create)
- _command_args=(
- {-t,--template}'[template to use for file creation (DefaultVFPage*)]:template:_values template "DefaultVFPage"' \
- {-d,--outputdir}'[folder for saving the created files]:outputdir:_path_files -/' \
- {-r,--reflect}'[switch to return flag detailed information]' \
- {-n,--pagename}'[name of the generated Visualforce page]:' \
- {-a,--apiversion}'[API version number (44.0*,43.0)]:apiversion:_values apiversion "44.0" "43.0"' \
- {-l,--label}'[Visualforce page label]:' \
- --json'[JSON output]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:user:password:generate)
- _command_args=(
- {-o,--onbehalfof}'[comma-separated list of usernames for which to generate passwords]:' \
- {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
- {-v,--targetdevhubusername}'[username or alias for the dev hub org; overrides default dev hub org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:user:permset:assign)
- _command_args=(
- {-n,--permsetname}'[the name of the permission set to assign]:' \
- {-o,--onbehalfof}'[comma-separated list of usernames or aliases to assign the permission set to]:' \
- {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:source:pull)
- _command_args=(
- {-w,--wait}'[wait time for command to finish in minutes (default: 33) (default:33, min:1)]:' \
- {-f,--forceoverwrite}'[ignore conflict warnings and overwrite changes to the project]' \
- {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:source:push)
- _command_args=(
- {-f,--forceoverwrite}'[ignore conflict warnings and overwrite changes to scratch org]' \
- {-g,--ignorewarnings}'[deploy changes even if warnings are generated]' \
- {-r,--replacetokens}'[replace tokens in source files prior to deployment]' \
- {-w,--wait}'[wait time for command to finish in minutes (default: 33) (default:33, min:1)]:' \
- {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:data:record:create)
- _command_args=(
- {-s,--sobjecttype}'[the type of the record you’re creating]:' \
- {-v,--values}'[the <fieldName>=<value> pairs you’re creating]:' \
- {-t,--usetoolingapi}'[create the record with tooling api]' \
- --perflog'[get API performance data.]' \
- {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:data:record:delete)
- _command_args=(
- {-s,--sobjecttype}'[the type of the record you’re deleting]:' \
- {-i,--sobjectid}'[the ID of the record you’re deleting]:' \
- {-w,--where}'[a list of <fieldName>=<value> pairs to search for]:' \
- {-t,--usetoolingapi}'[delete the record with Tooling API]' \
- --perflog'[get API performance data.]' \
- {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:data:record:get)
- _command_args=(
- {-s,--sobjecttype}'[the type of the record you’re retrieving]:' \
- {-i,--sobjectid}'[the ID of the record you’re retrieving]:' \
- {-w,--where}'[a list of <fieldName>=<value> pairs to search for]:' \
- {-t,--usetoolingapi}'[retrieve the record with Tooling API]' \
- --perflog'[get API performance data.]' \
- {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:data:record:update)
- _command_args=(
- {-s,--sobjecttype}'[the type of the record you’re updating]:' \
- {-i,--sobjectid}'[the ID of the record you’re updating]:' \
- {-w,--where}'[a list of <fieldName>=<value> pairs to search for]:' \
- {-v,--values}'[the <fieldName>=<value> pairs you’re updating]:' \
- {-t,--usetoolingapi}'[update the record with Tooling API]' \
- --perflog'[get API performance data.]' \
- {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:mdapi:retrieve)
- _command_args=(
- {-a,--apiversion}'[target API version for the retrieve (default 44.0)]:' \
- {-w,--wait}'[wait time for command to finish in minutes (default: -1 (no limit))]:' \
- {-r,--retrievetargetdir}'[directory root for the retrieved files]:retrievetargetdir:_path_files -/' \
- {-k,--unpackaged}'[file path of manifest of components to retrieve]:file:_files' \
- {-d,--sourcedir}'[source dir to use instead of default manifest sfdx-project.xml]:sourcedir:_path_files -/' \
- {-p,--packagenames}'[a comma-separated list of packages to retrieve]:' \
- {-s,--singlepackage}'[a single-package retrieve (default: false)]' \
- {-i,--jobid}'[(deprecated) job ID of the retrieve you want to check; defaults to your most recent CLI retrieval if not specified]:' \
- {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- --verbose'[verbose output of retrieve result]' \
- )
- ;;
- force:source:retrieve)
- _command_args=(
- {-w,--wait}'[wait time for command to finish in minutes (default: 33) (default:33, min:1)]:' \
- {-x,--manifest}'[file path for manifest (package.xml) of components to retrieve]:file:_files' \
- {-m,--metadata}'[comma-separated list of metadata component names]:' \
- {-p,--sourcepath}'[comma-separated list of source file paths to retrieve]:file:_files' \
- {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:mdapi:retrieve:report)
- _command_args=(
- {-w,--wait}'[wait time for command to finish in minutes (default: -1 (no limit))]:' \
- {-r,--retrievetargetdir}'[directory root for the retrieved files]:retrievetargetdir:_path_files -/' \
- {-i,--jobid}'[job ID of the retrieve you want to check; defaults to your most recent CLI retrieval if not specified]:' \
- {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- --verbose'[verbose output of retrieve result]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
  )
  ;;
  force:alias:set)
  _command_args=(
  --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
  )
  ;;
- force:config:set)
- _command_args=(
- {-g,--global}'[set config var globally (to be used from any directory)]' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:auth:sfdxurl:store)
- _command_args=(
- {-f,--sfdxurlfile}'[path to a file containing the sfdx url]:file:_files' \
- {-d,--setdefaultdevhubusername}'[set the authenticated org as the default dev hub org for scratch org creation]' \
- {-s,--setdefaultusername}'[set the authenticated org as the default username that all commands run against]' \
- {-a,--setalias}'[set an alias for the authenticated org]:' \
- {-p,--noprompt}'[do not prompt for auth confirmation in demo mode]' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:org:shape:create)
- _command_args=(
- {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:org:shape:delete)
- _command_args=(
- {-p,--noprompt}'[do not prompt for confirmation]' \
- {-u,--targetusername}'[username for the target org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:org:shape:list)
+ force:apex:class:create)
  _command_args=(
  --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- --verbose'[list more information about each org shape]' \
- )
- ;;
- force:org:snapshot:create)
- _command_args=(
- {-o,--sourceorg}'[ID or locally authenticated username or alias of scratch org to snapshot]:' \
- {-n,--snapshotname}'[unique name of snapshot]:' \
- {-d,--description}'[description of snapshot]:' \
- {-v,--targetdevhubusername}'[username or alias for the dev hub org; overrides default dev hub org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:org:snapshot:delete)
- _command_args=(
- {-s,--snapshot}'[name or ID of snapshot to delete]:' \
- {-v,--targetdevhubusername}'[username or alias for the dev hub org; overrides default dev hub org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:org:snapshot:get)
- _command_args=(
- {-s,--snapshot}'[name or ID of snapshot to retrieve]:' \
- {-v,--targetdevhubusername}'[username or alias for the dev hub org; overrides default dev hub org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:org:snapshot:list)
- _command_args=(
- {-v,--targetdevhubusername}'[username or alias for the dev hub org; overrides default dev hub org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:schema:sobject:describe)
- _command_args=(
- {-s,--sobjecttype}'[the API name of the object to describe]:' \
- {-t,--usetoolingapi}'[execute with Tooling API]' \
- {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:schema:sobject:list)
- _command_args=(
- {-c,--sobjecttypecategory}'[the type of objects to list (all|custom|standard)]:' \
- {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:data:soql:query)
- _command_args=(
- {-q,--query}'[SOQL query to execute]:' \
- {-t,--usetoolingapi}'[execute query with Tooling API]' \
- {-r,--resultformat}'[query result format emitted to stdout; --json flag overrides this parameter (human*,csv,json)]:resultformat:_values resultformat "human" "csv" "json"' \
- --perflog'[get API performance data.]' \
- {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:source:status)
- _command_args=(
- {-a,--all}'[list all the changes that have been made]' \
- {-l,--local}'[list the changes that have been made locally]' \
- {-r,--remote}'[list the changes that have been made in the scratch org]' \
- {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:lightning:test:create)
- _command_args=(
- {-n,--testname}'[name of the generated Lightning test]:' \
- {-t,--template}'[template to use for file creation (DefaultLightningTest*)]:template:_values template "DefaultLightningTest"' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-n,--classname}'[name of the generated Apex class]:' \
+ {-t,--template}'[template to use for file creation]:template:_values template "ApexException" "ApexUnitTest" "DefaultApexClass" "InboundEmailService"' \
  {-d,--outputdir}'[folder for saving the created files]:outputdir:_path_files -/' \
- {-r,--reflect}'[switch to return flag detailed information]' \
- --json'[JSON output]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
  )
  ;;
- force:lightning:test:install)
+ force:apex:execute)
  _command_args=(
- {-w,--wait}'[number of minutes to wait for installation status (default:2)]:' \
- {-r,--releaseversion}'[release version of Lightning Testing Service (default:latest)]:' \
- {-t,--packagetype}'[type of unmanaged package. 'full' option contains both jasmine and mocha, plus examples (full*,jasmine,mocha)]:packagetype:_values packagetype "jasmine" "mocha" "full"' \
- {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
  --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-f,--apexcodefile}'[path to a local file containing Apex code]:file:_files' \
+ )
+ ;;
+ force:apex:log:get)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-c,--color}'[colorize noteworthy log lines]' \
+ {-i,--logid}'[ID of the log to display]:' \
+ {-n,--number}'[number of most recent logs to display]:' \
+ )
+ ;;
+ force:apex:log:list)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ )
+ ;;
+ force:apex:log:tail)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-c,--color}'[colorize noteworthy log lines]' \
+ {-d,--debuglevel}'[debug level for trace flag]:' \
+ {-s,--skiptraceflag}'[skip trace flag setup]' \
  )
  ;;
  force:apex:test:report)
  _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
  {-i,--testrunid}'[ID of test run]:' \
  {-c,--codecoverage}'[retrieve code coverage results]' \
  {-d,--outputdir}'[directory to store test run files]:outputdir:_path_files -/' \
- {-r,--resultformat}'[test result format emitted to stdout; --json flag overrides this parameter (human*,tap,junit,json)]:resultformat:_values resultformat "human" "tap" "junit" "json"' \
- {-w,--wait}'[the streaming client socket timeout (in minutes) (default:6, min:2)]:' \
- {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
+ {-w,--wait}'[the streaming client socket timeout \(in minutes\)]:' \
  --verbose'[display Apex test processing details]' \
+ {-r,--resultformat}'[result format emitted to stdout; --json flag overrides this parameter]:resultformat:_values resultformat "human" "tap" "junit" "json"' \
  )
  ;;
  force:apex:test:run)
  _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
  {-n,--classnames}'[comma-separated list of Apex test class names to run]:' \
  {-s,--suitenames}'[comma-separated list of Apex test suite names to run]:' \
  {-t,--tests}'[comma-separated list of Apex test class names or IDs and, if applicable, test methods to run]:' \
  {-c,--codecoverage}'[retrieve code coverage results]' \
  {-d,--outputdir}'[directory to store test run files]:outputdir:_path_files -/' \
- {-l,--testlevel}'[testlevel enum value (RunLocalTests,RunAllTestsInOrg,RunSpecifiedTests)]:testlevel:_values testlevel "RunLocalTests" "RunAllTestsInOrg" "RunSpecifiedTests"' \
- {-r,--resultformat}'[test result format emitted to stdout; --json flag overrides this parameter (human*,tap,junit,json)]:resultformat:_values resultformat "human" "tap" "junit" "json"' \
- {-w,--wait}'[the streaming client socket timeout (in minutes) (default:6, min:2)]:' \
- --precompilewait'[how long to wait (in minutes) for Apex pre-compilation (default:3, min:3)]:' \
+ {-l,--testlevel}'[testlevel enum value]:testlevel:_values testlevel "RunLocalTests" "RunAllTestsInOrg" "RunSpecifiedTests"' \
+ {-w,--wait}'[the streaming client socket timeout \(in minutes\)]:' \
+ --precompilewait'[how long to wait \(in minutes\) for Apex pre-compilation]:' \
  {-y,--synchronous}'[run tests from a single class synchronously]' \
- {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
  --verbose'[display Apex test processing details]' \
- )
- ;;
- force:lightning:test:run)
- _command_args=(
- {-a,--appname}'[name of your Lightning test application]:' \
- {-d,--outputdir}'[directory path to store test run artifacts: for example, log files and test results]:outputdir:_path_files -/' \
- {-r,--resultformat}'[test result format emitted to stdout; --json flag overrides this parameter (human*,tap,junit,json)]:resultformat:_values resultformat "human" "tap" "junit" "json"' \
- {-f,--configfile}'[path to config file for the test]:file:_files' \
- {-o,--leavebrowseropen}'[leave browser open]' \
- {-t,--timeout}'[time (ms) to wait for results element in dom (default:60000)]:' \
- {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:data:tree:export)
- _command_args=(
- {-q,--query}'[soql query, or filepath of file containing a soql query, to retrieve records]:' \
- {-p,--plan}'[generate mulitple sobject tree files and a plan definition file for aggregated import]' \
- {-x,--prefix}'[prefix of generated files]:' \
- {-d,--outputdir}'[directory to store files]:outputdir:_path_files -/' \
- {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:data:tree:import)
- _command_args=(
- {-f,--sobjecttreefiles}'[comma-delimited, ordered paths of json files containing collection of record trees to insert]:file:_files' \
- {-p,--plan}'[path to plan to insert multiple data files that have master-detail relationships]:file:_files' \
- {-c,--contenttype}'[if data file extension is not .json, provide content type (applies to all files)]:' \
- --confighelp'[display schema information for the --plan configuration file to stdout; if you use this option, all other options except --json are ignored]' \
- {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
+ {-r,--resultformat}'[result format emitted to stdout; --json flag overrides this parameter]:resultformat:_values resultformat "human" "tap" "junit" "json"' \
  )
  ;;
  force:apex:trigger:create)
  _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
  {-n,--triggername}'[name of the generated Apex trigger]:' \
- {-t,--template}'[template to use for file creation (ApexTrigger*)]:template:_values template "ApexTrigger"' \
+ {-t,--template}'[template to use for file creation]:template:_values template "ApexTrigger"' \
  {-d,--outputdir}'[folder for saving the created files]:outputdir:_path_files -/' \
- {-r,--reflect}'[switch to return flag detailed information]' \
- {-a,--apiversion}'[API version number (44.0*,43.0)]:apiversion:_values apiversion "44.0" "43.0"' \
- {-s,--sobject}'[sObject to create a trigger on (SOBJECT*)]:' \
- {-e,--triggerevents}'[events that fire the trigger (before insert*,before update,before delete,after insert,after update,after delete,after undelete)]:triggerevents:_values -s , triggerevents "before insert" "before update" "before delete" "after insert" "after update" "after delete" "after undelete"' \
- --json'[JSON output]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-s,--sobject}'[sObject to create a trigger on]:' \
+ {-e,--triggerevents}'[events that fire the trigger]:' \
  )
  ;;
- force:package:uninstall)
+ force:auth:device:login)
  _command_args=(
- {-w,--wait}'[number of minutes to wait for uninstall status]:' \
- {-p,--package}'[ID (starts with 04t) or alias of the package version to uninstall]:' \
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-i,--clientid}'[OAuth client ID \(aka consumer key\)]:' \
+ {-r,--instanceurl}'[login URL of the instance the org is on]:' \
+ {-d,--setdefaultdevhubusername}'[set the authenticated org as the default Dev Hub org for scratch org creation]' \
+ {-s,--setdefaultusername}'[set the authenticated org as the default username that all commands run against]' \
+ {-a,--setalias}'[set an alias for the authenticated org]:' \
+ )
+ ;;
+ force:auth:jwt:grant)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-u,--username}'[authentication username]:' \
+ {-f,--jwtkeyfile}'[path to a file containing the private key]:file:_files' \
+ {-i,--clientid}'[OAuth client ID \(sometimes called the consumer key\)]:' \
+ {-r,--instanceurl}'[the login URL of the instance the org lives on]:' \
+ {-d,--setdefaultdevhubusername}'[set the authenticated org as the default dev hub org for scratch org creation]' \
+ {-s,--setdefaultusername}'[set the authenticated org as the default username that all commands run against]' \
+ {-a,--setalias}'[set an alias for the authenticated org]:' \
+ {-p,--noprompt}'[do not prompt for auth confirmation in demo mode]' \
+ )
+ ;;
+ force:auth:list)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ )
+ ;;
+ force:auth:logout)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
  {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-a,--all}'[include all authenticated orgs]' \
+ {-p,--noprompt}'[do not prompt for confirmation]' \
  )
  ;;
- force:package:uninstall:report)
+ force:auth:sfdxurl:store)
  _command_args=(
- {-i,--requestid}'[ID of the package uninstall request you want to check]:' \
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-f,--sfdxurlfile}'[path to a file containing the sfdx url]:file:_files' \
+ {-d,--setdefaultdevhubusername}'[set the authenticated org as the default dev hub org for scratch org creation]' \
+ {-s,--setdefaultusername}'[set the authenticated org as the default username that all commands run against]' \
+ {-a,--setalias}'[set an alias for the authenticated org]:' \
+ {-p,--noprompt}'[do not prompt for auth confirmation in demo mode]' \
+ )
+ ;;
+ force:auth:web:login)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-i,--clientid}'[OAuth client ID \(sometimes called the consumer key\)]:' \
+ {-r,--instanceurl}'[the login URL of the instance the org lives on]:' \
+ {-d,--setdefaultdevhubusername}'[set the authenticated org as the default dev hub org for scratch org creation]' \
+ {-s,--setdefaultusername}'[set the authenticated org as the default username that all commands run against]' \
+ {-a,--setalias}'[set an alias for the authenticated org]:' \
+ --disablemasking'[disable masking of user input \(for use with problematic terminals\)]' \
+ {-p,--noprompt}'[do not prompt for auth confirmation in demo mode]' \
+ )
+ ;;
+ force:config:get)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ --verbose'[emit additional command output to stdout]' \
+ )
+ ;;
+ force:config:list)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ )
+ ;;
+ force:config:set)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-g,--global}'[set config var globally \(to be used from any directory\)]' \
+ )
+ ;;
+ force:data:bulk:delete)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
  {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-s,--sobjecttype}'[the sObject type of the records you’re deleting]:' \
+ {-f,--csvfile}'[the path to the CSV file containing the ids of the records to delete]:file:_files' \
+ {-w,--wait}'[the number of minutes to wait for the command to complete before displaying the results]:' \
  )
  ;;
- force:package:update)
+ force:data:bulk:status)
  _command_args=(
- {-p,--package}'[ID (starts with 0Ho) or alias of the package to update]:' \
- {-n,--name}'[new package name]:' \
- {-d,--description}'[new package description]:' \
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-i,--jobid}'[the ID of the job you want to view or of the job whose batch you want to view]:' \
+ {-b,--batchid}'[the ID of the batch whose status you want to view]:' \
+ )
+ ;;
+ force:data:bulk:upsert)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-s,--sobjecttype}'[the sObject type of the records you want to upsert]:' \
+ {-f,--csvfile}'[the path to the CSV file that defines the records to upsert]:file:_files' \
+ {-i,--externalid}'[the column name of the external ID]:' \
+ {-w,--wait}'[the number of minutes to wait for the command to complete before displaying the results]:' \
+ )
+ ;;
+ force:data:record:create)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-s,--sobjecttype}'[the type of the record you’re creating]:' \
+ {-v,--values}'[the <fieldName>=<value> pairs you’re creating]:' \
+ {-t,--usetoolingapi}'[create the record with tooling api]' \
+ --perflog'[get API performance data]' \
+ )
+ ;;
+ force:data:record:delete)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-s,--sobjecttype}'[the type of the record you’re deleting]:' \
+ {-i,--sobjectid}'[the ID of the record you’re deleting]:' \
+ {-w,--where}'[a list of <fieldName>=<value> pairs to search for]:' \
+ {-t,--usetoolingapi}'[delete the record with Tooling API]' \
+ --perflog'[get API performance data]' \
+ )
+ ;;
+ force:data:record:get)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-s,--sobjecttype}'[the type of the record you’re retrieving]:' \
+ {-i,--sobjectid}'[the ID of the record you’re retrieving]:' \
+ {-w,--where}'[a list of <fieldName>=<value> pairs to search for]:' \
+ {-t,--usetoolingapi}'[retrieve the record with Tooling API]' \
+ --perflog'[get API performance data]' \
+ )
+ ;;
+ force:data:record:update)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-s,--sobjecttype}'[the type of the record you’re updating]:' \
+ {-i,--sobjectid}'[the ID of the record you’re updating]:' \
+ {-w,--where}'[a list of <fieldName>=<value> pairs to search for]:' \
+ {-v,--values}'[the <fieldName>=<value> pairs you’re updating]:' \
+ {-t,--usetoolingapi}'[update the record with Tooling API]' \
+ --perflog'[get API performance data]' \
+ )
+ ;;
+ force:data:soql:query)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-q,--query}'[SOQL query to execute]:' \
+ {-t,--usetoolingapi}'[execute query with Tooling API]' \
+ {-r,--resultformat}'[result format emitted to stdout; --json flag overrides this parameter]:resultformat:_values resultformat "human" "csv" "json"' \
+ --perflog'[get API performance data]' \
+ )
+ ;;
+ force:data:tree:export)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-q,--query}'[soql query, or filepath of file containing a soql query, to retrieve records]:' \
+ {-p,--plan}'[generate mulitple sobject tree files and a plan definition file for aggregated import]' \
+ {-x,--prefix}'[prefix of generated files]:' \
+ {-d,--outputdir}'[directory to store files]:outputdir:_path_files -/' \
+ )
+ ;;
+ force:data:tree:import)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-f,--sobjecttreefiles}'[comma-delimited, ordered paths of json files containing collection of record trees to insert]:' \
+ {-p,--plan}'[path to plan to insert multiple data files that have master-detail relationships]:file:_files' \
+ {-c,--contenttype}'[if data file extension is not .json, provide content type \(applies to all files\)]:' \
+ --confighelp'[display schema information for the --plan configuration file to stdout; if you use this option, all other options except --json are ignored]' \
+ )
+ ;;
+ force:doc:commands:display)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ )
+ ;;
+ force:doc:commands:list)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-u,--usage}'[list only docopt usage strings]' \
+ )
+ ;;
+ force:lightning:app:create)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-n,--appname}'[name of the generated Lightning app]:' \
+ {-t,--template}'[template to use for file creation]:template:_values template "DefaultLightningApp"' \
+ {-d,--outputdir}'[folder for saving the created files]:outputdir:_path_files -/' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-i,--internal}'[create lightning bundles without creating a -meta.xml file]' \
+ )
+ ;;
+ force:lightning:component:create)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-n,--componentname}'[name of the generated Lightning component]:' \
+ {-t,--template}'[template to use for file creation]:' \
+ {-d,--outputdir}'[folder for saving the created files]:outputdir:_path_files -/' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ --type'[type of the Lightning component]:type:_values type "aura" "lwc"' \
+ {-i,--internal}'[create lightning bundles without creating a -meta.xml file]' \
+ )
+ ;;
+ force:lightning:event:create)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-n,--eventname}'[name of the generated Lightning event]:' \
+ {-t,--template}'[template to use for file creation]:template:_values template "DefaultLightningEvt"' \
+ {-d,--outputdir}'[folder for saving the created files]:outputdir:_path_files -/' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-i,--internal}'[create lightning bundles without creating a -meta.xml file]' \
+ )
+ ;;
+ force:lightning:interface:create)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-n,--interfacename}'[name of the generated Lightning interface]:' \
+ {-t,--template}'[template to use for file creation]:template:_values template "DefaultLightningIntf"' \
+ {-d,--outputdir}'[folder for saving the created files]:outputdir:_path_files -/' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-i,--internal}'[create lightning bundles without creating a -meta.xml file]' \
+ )
+ ;;
+ force:lightning:lint)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-i,--ignore}'[pattern used to ignore some folders]:' \
+ --files'[pattern used to include specific files]:' \
+ --config'[path to a custom ESLint configuration file]:' \
+ --verbose'[report warnings in addition to errors]' \
+ --exit'[exit with error code 1 if there are lint issues]' \
+ )
+ ;;
+ force:lightning:lwc:start)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
  {-v,--targetdevhubusername}'[username or alias for the dev hub org; overrides default dev hub org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
+ {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-p,--port}'[port to run local dev server on, defaults to 3333]:' \
  )
  ;;
- force:project:upgrade)
+ force:lightning:test:create)
  _command_args=(
- {-f,--forceupgrade}'[run all upgrades even if project has already been upgraded]' \
  --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-n,--testname}'[name of the generated Lightning test]:' \
+ {-t,--template}'[template to use for file creation]:template:_values template "DefaultLightningTest"' \
+ {-d,--outputdir}'[folder for saving the created files]:outputdir:_path_files -/' \
+ {-i,--internal}'[create lightning bundles without creating a -meta.xml file]' \
  )
  ;;
- force:package:version:create)
+ force:lightning:test:install)
  _command_args=(
- {-p,--package}'[ID (starts with 0Ho) or alias of the package to create a version of]:' \
- {-d,--path}'[path to directory that contains the contents of the package]:path:_path_files -/' \
- {-f,--definitionfile}'[path to a definition file similar to scratch org definition file that contains the list of features and org preferences that the metadata of the package version depends on]:file:_files' \
- {-b,--branch}'[the package version’s branch]:' \
- {-t,--tag}'[the package version’s tag]:' \
- {-k,--installationkey}'[installation key for key-protected package (either --installationkey or --installationkeybypass is required)]:' \
- {-x,--installationkeybypass}'[bypass the installation key requirement (either --installationkey or --installationkeybypass is required)]' \
- {-r,--preserve}'[temp files are preserved that would otherwise be deleted]' \
- {-j,--validateschema}'[sfdx-project.json is validated against JSON schema]' \
- {-w,--wait}'[minutes to wait for the package version to be created (default:0)]:' \
- {-s,--buildinstance}'[the instance where the package version will be created——for example, NA50]:' \
- {-o,--sourceorg}'[the source org ID used to copy the org shape for the build org]:' \
- {-a,--versionname}'[the name of the package version to be created]:' \
- {-n,--versionnumber}'[the version number of the package version to be created]:' \
- {-e,--versiondescription}'[the description of the package version to be created]:' \
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-w,--wait}'[number of minutes to wait for installation status]:' \
+ {-r,--releaseversion}'[release version of Lightning Testing Service]:' \
+ {-t,--packagetype}'[type of unmanaged package. '\''full'\'' option contains both jasmine and mocha, plus examples]:packagetype:_values packagetype "jasmine" "mocha" "full"' \
+ )
+ ;;
+ force:lightning:test:run)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-a,--appname}'[name of your Lightning test application]:' \
+ {-d,--outputdir}'[directory path to store test run artifacts: for example, log files and test results]:outputdir:_path_files -/' \
+ {-f,--configfile}'[path to config file for the test]:file:_files' \
+ {-o,--leavebrowseropen}'[leave browser open]' \
+ {-t,--timeout}'[time \(ms\) to wait for results element in dom]:' \
+ {-r,--resultformat}'[result format emitted to stdout; --json flag overrides this parameter]:resultformat:_values resultformat "human" "tap" "junit" "json"' \
+ )
+ ;;
+ force:limits:api:display)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ )
+ ;;
+ force:mdapi:convert)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-r,--rootdir}'[the root directory containing the Metadata API–formatted metadata]:rootdir:_path_files -/' \
+ {-d,--outputdir}'[the output directory to store the source–formatted files]:outputdir:_path_files -/' \
+ {-x,--manifest}'[file path to manifest \(package.xml\) of metadata types to convert.]:' \
+ {-m,--metadata}'[comma-separated list of metadata component names to convert]:' \
+ {-p,--metadatapath}'[comma-separated list of paths to the local source files to convert]:' \
+ )
+ ;;
+ force:mdapi:deploy)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-c,--checkonly}'[validate deploy but don’t save to the org]' \
+ {-d,--deploydir}'[root of directory tree of files to deploy]:deploydir:_path_files -/' \
+ {-w,--wait}'[wait time for command to finish in minutes \(default: 0\)]:' \
+ {-l,--testlevel}'[deployment testing level]:testlevel:_values testlevel "NoTestRun" "RunSpecifiedTests" "RunLocalTests" "RunAllTestsInOrg"' \
+ {-r,--runtests}'[tests to run if --testlevel RunSpecifiedTests]:' \
+ {-o,--ignoreerrors}'[ignore any errors and do not roll back deployment]' \
+ {-g,--ignorewarnings}'[whether a warning will allow a deployment to complete successfully]' \
+ {-q,--validateddeployrequestid}'[request ID of the validated deployment to run a Quick Deploy]:' \
+ --verbose'[verbose output of deploy results]' \
+ {-f,--zipfile}'[path to .zip file of metadata to deploy]:file:_files' \
+ )
+ ;;
+ force:mdapi:deploy:cancel)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-w,--wait}'[wait time for command to finish in minutes 33]:' \
+ {-i,--jobid}'[job ID of the deployment you want to cancel; defaults to your most recent CLI deployment if not specified]:' \
+ )
+ ;;
+ force:mdapi:deploy:report)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-w,--wait}'[wait time for command to finish in minutes \(default: 0\)]:' \
+ {-i,--jobid}'[job ID of the deployment you want to check; defaults to your most recent CLI deployment if not specified]:' \
+ --verbose'[verbose output of deploy results]' \
+ )
+ ;;
+ force:mdapi:describemetadata)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
+ {-a,--apiversion}'[API version to use \(the default is 47.0\)]:' \
+ {-f,--resultfile}'[filter metadata known by the CLI]:file:_files' \
+ {-k,--filterknown}'[path to the file where results are stored]' \
+ )
+ ;;
+ force:mdapi:listmetadata)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
+ {-a,--apiversion}'[API version to use \(the default is 47.0\)]:' \
+ {-f,--resultfile}'[path to the file where results are stored]:file:_files' \
+ {-m,--metadatatype}'[metadata type to be retrieved, such as CustomObject; metadata type value is case-sensitive]:' \
+ --folder'[folder associated with the component; required for components that use folders; folder names are case-sensitive]:' \
+ )
+ ;;
+ force:mdapi:retrieve)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
+ {-a,--apiversion}'[target API version for the retrieve \(default 47.0\)]:' \
+ {-w,--wait}'[wait time for command to finish in minutes \(default: -1 \(no limit\)\)]:' \
+ {-r,--retrievetargetdir}'[directory root for the retrieved files]:retrievetargetdir:_path_files -/' \
+ {-k,--unpackaged}'[file path of manifest of components to retrieve]:file:_files' \
+ --verbose'[verbose output of retrieve result]' \
+ {-d,--sourcedir}'[source dir to use instead of the default package dir in sfdx-project.json]:sourcedir:_path_files -/' \
+ {-p,--packagenames}'[a comma-separated list of packages to retrieve]:' \
+ {-s,--singlepackage}'[a single-package retrieve \(default: false\)]' \
+ )
+ ;;
+ force:mdapi:retrieve:report)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-w,--wait}'[wait time for command to finish in minutes \(default: -1 \(no limit\)\)]:' \
+ {-r,--retrievetargetdir}'[directory root for the retrieved files]:retrievetargetdir:_path_files -/' \
+ --verbose'[verbose output of retrieve result]' \
+ {-i,--jobid}'[job ID of the retrieve you want to check; defaults to your most recent CLI retrieval if not specified]:' \
+ )
+ ;;
+ force:org:clone)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-t,--type}'[type of org to create]:type:_values type "sandbox"' \
+ {-f,--definitionfile}'[path to an org definition file]:file:_files' \
+ {-j,--definitionjson}'[org definition in JSON format]:' \
+ {-s,--setdefaultusername}'[set the created org as the default username]' \
+ {-a,--setalias}'[alias for the created org]:' \
+ {-w,--wait}'[the streaming client socket timeout \(in minutes\)]:' \
+ )
+ ;;
+ force:org:create)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
  {-v,--targetdevhubusername}'[username or alias for the dev hub org; overrides default dev hub org]:' \
+ {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-t,--type}'[type of org to create; sandbox org creation is in beta]:type:_values type "scratch" "sandbox"' \
+ {-f,--definitionfile}'[path to an org definition file]:file:_files' \
+ {-j,--definitionjson}'[org definition in JSON format]:' \
+ {-n,--nonamespace}'[create the scratch org with no namespace]' \
+ {-c,--noancestors}'[do not include second-generation package ancestors in the scratch org]' \
+ {-i,--clientid}'[connected app consumer key; not supported for sandbox org creation]:' \
+ {-s,--setdefaultusername}'[set the created org as the default username]' \
+ {-a,--setalias}'[alias for the created org]:' \
+ {-e,--env}'[environment where the scratch org is created: sandbox*,virtual,prototype]:env:_values env "sandbox*" "virtual" "prototype"' \
+ {-w,--wait}'[the streaming client socket timeout \(in minutes\)]:' \
+ {-d,--durationdays}'[duration of the scratch org \(in days\) \(default:7, min:1, max:30\)]:' \
+ )
+ ;;
+ force:org:delete)
+ _command_args=(
  --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-v,--targetdevhubusername}'[username or alias for the dev hub org; overrides default dev hub org]:' \
+ {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-p,--noprompt}'[no prompt to confirm deletion]' \
+ )
+ ;;
+ force:org:display)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ --verbose'[emit additional command output to stdout]' \
+ )
+ ;;
+ force:org:list)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ --verbose'[list more information about each org]' \
+ --all'[include expired, deleted, and unknown-status scratch orgs]' \
+ --clean'[remove all local org authorizations for non-active orgs]' \
+ {-p,--noprompt}'[do not prompt for confirmation]' \
+ )
+ ;;
+ force:org:open)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-p,--path}'[navigation URL path]:' \
+ {-r,--urlonly}'[display navigation URL, but don’t launch browser]' \
+ )
+ ;;
+ force:org:shape:create)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ )
+ ;;
+ force:org:shape:delete)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-p,--noprompt}'[do not prompt for confirmation]' \
+ )
+ ;;
+ force:org:shape:list)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ --verbose'[list more information about each org shape]' \
+ )
+ ;;
+ force:org:snapshot:create)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-v,--targetdevhubusername}'[username or alias for the dev hub org; overrides default dev hub org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-o,--sourceorg}'[ID or locally authenticated username or alias of scratch org to snapshot]:' \
+ {-n,--snapshotname}'[unique name of snapshot]:' \
+ {-d,--description}'[description of snapshot]:' \
+ )
+ ;;
+ force:org:snapshot:delete)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-v,--targetdevhubusername}'[username or alias for the dev hub org; overrides default dev hub org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-s,--snapshot}'[name or ID of snapshot to delete]:' \
+ )
+ ;;
+ force:org:snapshot:get)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-v,--targetdevhubusername}'[username or alias for the dev hub org; overrides default dev hub org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-s,--snapshot}'[name or ID of snapshot to retrieve]:' \
+ )
+ ;;
+ force:org:snapshot:list)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-v,--targetdevhubusername}'[username or alias for the dev hub org; overrides default dev hub org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ )
+ ;;
+ force:org:status)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-n,--sandboxname}'[name of the sandbox org to check status for]:' \
+ {-s,--setdefaultusername}'[set the created org as the default username]' \
+ {-a,--setalias}'[alias for the created org]:' \
+ {-w,--wait}'[number of minutes to wait while polling for status]:' \
  )
  ;;
  force:package1:version:create)
  _command_args=(
- {-i,--packageid}'[ID of the metadata package (starts with 033) of which you’re creating a new version]:' \
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-i,--packageid}'[ID of the metadata package \(starts with 033\) of which you’re creating a new version]:' \
  {-n,--name}'[package version name]:' \
  {-d,--description}'[package version description]:' \
  {-v,--version}'[package version in major.minor format, for example, 3.2]:' \
  {-m,--managedreleased}'[create a managed package version]' \
  {-r,--releasenotesurl}'[release notes URL]:' \
  {-p,--postinstallurl}'[post install URL]:' \
- {-k,--installationkey}'[installation key for key-protected package (default: null)]:' \
- {-w,--wait}'[minutes to wait for the package version to be created (default: 2 minutes)]:' \
- {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
+ {-k,--installationkey}'[installation key for key-protected package \(default: null\)]:' \
+ {-w,--wait}'[minutes to wait for the package version to be created \(default: 2 minutes\)]:' \
  )
  ;;
  force:package1:version:create:get)
  _command_args=(
- {-i,--requestid}'[PackageUploadRequest ID]:' \
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
  {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:package:version:create:list)
- _command_args=(
- {-c,--createdlastdays}'[created in the last specified number of days (starting at 00:00:00 of first day to now; 0 for today)]:' \
- {-s,--status}'[filter the list by version creation request status (Queued,InProgress,Success,Error)]:status:_values status "Queued" "InProgress" "Success" "Error"' \
- {-v,--targetdevhubusername}'[username or alias for the dev hub org; overrides default dev hub org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:package:version:create:report)
- _command_args=(
- {-i,--packagecreaterequestid}'[package version creation request ID (starts with 08c)]:' \
- {-v,--targetdevhubusername}'[username or alias for the dev hub org; overrides default dev hub org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-i,--requestid}'[PackageUploadRequest ID]:' \
  )
  ;;
  force:package1:version:display)
  _command_args=(
- {-i,--packageversionid}'[metadata package version ID (starts with 04t)]:' \
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
  {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- )
- ;;
- force:package:version:list)
- _command_args=(
- {-c,--createdlastdays}'[created in the last specified number of days (starting at 00:00:00 of first day to now; 0 for today)]:' \
- {-m,--modifiedlastdays}'[list items modified in the specified last number of days (starting at 00:00:00 of first day to now; 0 for today)]:' \
- {-p,--packages}'[filter results on specified comma-delimited packages (aliases or 0Ho IDs)]:' \
- {-r,--released}'[display released versions only]' \
- {-o,--orderby}'[order by the specified package version fields]:' \
- {-v,--targetdevhubusername}'[username or alias for the dev hub org; overrides default dev hub org]:' \
- --concise'[display limited package version details]' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
- --verbose'[display extended package version details]' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-i,--packageversionid}'[metadata package version ID \(starts with 04t\)]:' \
  )
  ;;
  force:package1:version:list)
  _command_args=(
- {-i,--packageid}'[metadata package ID (starts with 033)]:' \
- {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
  --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-i,--packageid}'[metadata package ID \(starts with 033\)]:' \
+ )
+ ;;
+ force:package:create)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-v,--targetdevhubusername}'[username or alias for the dev hub org; overrides default dev hub org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-n,--name}'[package name]:' \
+ {-t,--packagetype}'[package type]:packagetype:_values packagetype "Managed" "Unlocked"' \
+ {-d,--description}'[package description]:' \
+ {-e,--nonamespace}'[creates the package with no namespace; available only for unlocked packages.]' \
+ {-r,--path}'[path to directory that contains the contents of the package]:path:_path_files -/' \
+ )
+ ;;
+ force:package:hammertest:list)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-i,--packageversionid}'[ID of the package version to list results for]:' \
+ )
+ ;;
+ force:package:hammertest:report)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-i,--requestid}'[ID of the hammer request to report on]:' \
+ {-s,--summary}'[report only a results summary \(hide Apex test failures\)]' \
+ )
+ ;;
+ force:package:hammertest:run)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-i,--packageversionids}'[comma-separated list of package version IDs to test]:' \
+ {-s,--subscriberorgs}'[comma-separated list of subscriber org IDs]:' \
+ {-f,--subscriberfile}'[file with list of subscriber orgs IDs, one per line]:' \
+ {-d,--scheduledrundatetime}'[earliest date/time to run the package upgrade test \(YYYY-MM-DD HH:mm:ss, in GMT\)]:' \
+ {-p,--preview}'[run the package hammer test in the Salesforce preview version]' \
+ {-t,--apextests}'[after package upgrade validation, run the package'\''s Apex tests in the subscriber org]' \
+ {-n,--apextestinterface}'[after package upgrade validation, run the Apex tests in the subscriber org that implement this interface]:' \
+ )
+ ;;
+ force:package:install)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-w,--wait}'[number of minutes to wait for installation status]:' \
+ {-k,--installationkey}'[installation key for key-protected package \(default: null\)]:' \
+ {-b,--publishwait}'[number of minutes to wait for subscriber package version ID to become available in the target org ]:' \
+ {-r,--noprompt}'[do not prompt for confirmation]' \
+ {-p,--package}'[ID \(starts with 04t\) or alias of the package version to install]:' \
+ {-a,--apexcompile}'[compile all Apex in the org and package, or only Apex in the package]:apexcompile:_values apexcompile "all" "package"' \
+ {-s,--securitytype}'[security access type for the installed package \(deprecation notice: The default --securitytype value will change from AllUsers to AdminsOnly in v47.0 or later.\)]:securitytype:_values securitytype "AllUsers" "AdminsOnly"' \
+ {-t,--upgradetype}'[the upgrade type for the package installation]:upgradetype:_values upgradetype "DeprecateOnly" "Mixed" "Delete"' \
+ )
+ ;;
+ force:package:install:report)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-i,--requestid}'[ID of the package install request you want to check]:' \
+ )
+ ;;
+ force:package:installed:list)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ )
+ ;;
+ force:package:list)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-v,--targetdevhubusername}'[username or alias for the dev hub org; overrides default dev hub org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ --verbose'[display extended package detail]' \
+ )
+ ;;
+ force:package:uninstall)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-w,--wait}'[number of minutes to wait for uninstall status]:' \
+ {-p,--package}'[ID \(starts with 04t\) or alias of the package version to uninstall]:' \
+ )
+ ;;
+ force:package:uninstall:report)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-i,--requestid}'[ID of the package uninstall request you want to check]:' \
+ )
+ ;;
+ force:package:update)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-v,--targetdevhubusername}'[username or alias for the dev hub org; overrides default dev hub org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-p,--package}'[ID \(starts with 0Ho\) or alias of the package to update]:' \
+ {-n,--name}'[new package name]:' \
+ {-d,--description}'[new package description]:' \
+ )
+ ;;
+ force:package:version:create)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-v,--targetdevhubusername}'[username or alias for the dev hub org; overrides default dev hub org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-p,--package}'[ID \(starts with 0Ho\) or alias of the package to create a version of]:' \
+ {-d,--path}'[path to directory that contains the contents of the package]:path:_path_files -/' \
+ {-f,--definitionfile}'[path to a definition file similar to scratch org definition file that contains the list of features and org preferences that the metadata of the package version depends on]:file:_files' \
+ {-b,--branch}'[the package version’s branch]:' \
+ {-t,--tag}'[the package version’s tag]:' \
+ {-k,--installationkey}'[installation key for key-protected package \(either --installationkey or --installationkeybypass is required\)]:' \
+ {-x,--installationkeybypass}'[bypass the installation key requirement \(either --installationkey or --installationkeybypass is required\)]' \
+ {-r,--preserve}'[temp files are preserved that would otherwise be deleted]' \
+ {-j,--validateschema}'[sfdx-project.json is validated against JSON schema]' \
+ {-w,--wait}'[minutes to wait for the package version to be created]:' \
+ {-s,--buildinstance}'[the instance where the package version will be created——for example, NA50]:' \
+ {-o,--sourceorg}'[the source org ID used to copy the org shape for the build org]:' \
+ {-a,--versionname}'[the name of the package version to be created]:' \
+ {-n,--versionnumber}'[the version number of the package version to be created]:' \
+ {-e,--versiondescription}'[the description of the package version to be created]:' \
+ {-c,--codecoverage}'[calculate the code coverage by running the packaged Apex tests. Note: Managed packages must use this option and meet the code coverage requirements to promote the version.]' \
+ --releasenotesurl'[release notes URL]:' \
+ --postinstallurl'[post-install URL]:' \
+ --postinstallscript'[post-install script name]:' \
+ --uninstallscript'[uninstall script name]:' \
+ )
+ ;;
+ force:package:version:create:list)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-v,--targetdevhubusername}'[username or alias for the dev hub org; overrides default dev hub org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-c,--createdlastdays}'[created in the last specified number of days \(starting at 00:00:00 of first day to now; 0 for today\)]:' \
+ {-s,--status}'[filter the list by version creation request status]:status:_values status "Queued" "InProgress" "Success" "Error"' \
+ )
+ ;;
+ force:package:version:create:report)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-v,--targetdevhubusername}'[username or alias for the dev hub org; overrides default dev hub org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-i,--packagecreaterequestid}'[package version creation request ID \(starts with 08c\)]:' \
+ )
+ ;;
+ force:package:version:list)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-v,--targetdevhubusername}'[username or alias for the dev hub org; overrides default dev hub org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-c,--createdlastdays}'[created in the last specified number of days \(starting at 00:00:00 of first day to now; 0 for today\)]:' \
+ --concise'[display limited package version details]' \
+ {-m,--modifiedlastdays}'[list items modified in the specified last number of days \(starting at 00:00:00 of first day to now; 0 for today\)]:' \
+ {-p,--packages}'[filter results on specified comma-delimited packages \(aliases or 0Ho IDs\)]:' \
+ {-r,--released}'[display released versions only]' \
+ {-o,--orderby}'[order by the specified package version fields]:' \
+ --verbose'[display extended package version details]' \
  )
  ;;
  force:package:version:promote)
  _command_args=(
- {-p,--package}'[ID (starts with 04t) or alias of the package version to promote]:' \
- {-n,--noprompt}'[no prompt to confirm setting the package version as released]' \
- {-v,--targetdevhubusername}'[username or alias for the dev hub org; overrides default dev hub org]:' \
  --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-v,--targetdevhubusername}'[username or alias for the dev hub org; overrides default dev hub org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-p,--package}'[ID \(starts with 04t\) or alias of the package version to promote]:' \
+ {-n,--noprompt}'[no prompt to confirm setting the package version as released]' \
  )
  ;;
  force:package:version:report)
  _command_args=(
- {-p,--package}'[ID (starts with 04t) or alias of the package to retrieve details for]:' \
- {-v,--targetdevhubusername}'[username or alias for the dev hub org; overrides default dev hub org]:' \
  --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-v,--targetdevhubusername}'[username or alias for the dev hub org; overrides default dev hub org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-p,--package}'[ID \(starts with 04t\) or alias of the package to retrieve details for]:' \
  --verbose'[displays extended package version details]' \
  )
  ;;
  force:package:version:update)
  _command_args=(
- {-p,--package}'[ID (starts with 04t) or alias of the package to update a version of]:' \
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-v,--targetdevhubusername}'[username or alias for the dev hub org; overrides default dev hub org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-p,--package}'[ID \(starts with 04t\) or alias of the package to update a version of]:' \
  {-a,--versionname}'[new package version name]:' \
  {-e,--versiondescription}'[new package version description]:' \
  {-b,--branch}'[new package version branch]:' \
  {-t,--tag}'[new package version tag]:' \
- {-k,--installationkey}'[new installation key for key-protected package (default: null)]:' \
- {-v,--targetdevhubusername}'[username or alias for the dev hub org; overrides default dev hub org]:' \
- --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
+ {-k,--installationkey}'[new installation key for key-protected package \(default: null\)]:' \
  )
  ;;
- force:auth:web:login)
+ force:project:create)
  _command_args=(
- {-i,--clientid}'[OAuth client ID (sometimes called the consumer key)]:' \
- {-r,--instanceurl}'[the login URL of the instance the org lives on]:' \
- {-d,--setdefaultdevhubusername}'[set the authenticated org as the default dev hub org for scratch org creation]' \
- {-s,--setdefaultusername}'[set the authenticated org as the default username that all commands run against]' \
- {-a,--setalias}'[set an alias for the authenticated org]:' \
- --disablemasking'[disable masking of user input (for use with problematic terminals)]' \
- {-p,--noprompt}'[do not prompt for auth confirmation in demo mode]' \
  --json'[format output as json]' \
- --loglevel'[logging level for this command invocation (error*,trace,debug,info,warn,fatal)]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal"' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-n,--projectname}'[name of the generated project]:' \
+ {-t,--template}'[template to use for project creation]:template:_values template "standard" "empty" "analytics"' \
+ {-d,--outputdir}'[folder for saving the created files]:outputdir:_path_files -/' \
+ {-s,--namespace}'[project associated namespace]:' \
+ {-p,--defaultpackagedir}'[default package directory name]:' \
+ {-x,--manifest}'[generate a manifest \(package.xml\) for change-set based development]' \
+ {-l,--loginurl}'[Salesforce instance login URL]:' \
+ )
+ ;;
+ force:project:upgrade)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-f,--forceupgrade}'[run all upgrades even if project has already been upgraded]' \
+ )
+ ;;
+ force:schema:sobject:describe)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-s,--sobjecttype}'[the API name of the object to describe]:' \
+ {-t,--usetoolingapi}'[execute with Tooling API]' \
+ )
+ ;;
+ force:schema:sobject:list)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-c,--sobjecttypecategory}'[the type of objects to list \(all\|custom\|standard\)]:' \
+ )
+ ;;
+ force:source:convert)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-r,--rootdir}'[a source directory other than the default package to convert]:rootdir:_path_files -/' \
+ {-d,--outputdir}'[output directory to store the Metadata API–formatted files in]:outputdir:_path_files -/' \
+ {-n,--packagename}'[name of the package to associate with the metadata-formatted files]:' \
+ {-x,--manifest}'[file path to manifest \(package.xml\) of metadata types to convert.]:' \
+ {-p,--sourcepath}'[comma-separated list of paths to the local source files to convert]:' \
+ {-m,--metadata}'[comma-separated list of metadata component names to convert]:' \
+ )
+ ;;
+ force:source:delete)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-r,--noprompt}'[do not prompt for delete confirmation]' \
+ {-w,--wait}'[wait time for command to finish in minutes 33]:' \
+ {-p,--sourcepath}'[comma-separated list of paths to the local metadata to delete]:' \
+ {-m,--metadata}'[comma-separated list of names of metadata components to delete]:' \
+ )
+ ;;
+ force:source:deploy)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-c,--checkonly}'[validate deploy but don’t save to the org]' \
+ {-w,--wait}'[wait time for command to finish in minutes]:' \
+ {-l,--testlevel}'[deployment testing level]:testlevel:_values testlevel "NoTestRun" "RunSpecifiedTests" "RunLocalTests" "RunAllTestsInOrg"' \
+ {-r,--runtests}'[tests to run if --testlevel RunSpecifiedTests]:' \
+ {-o,--ignoreerrors}'[ignore any errors and do not roll back deployment]' \
+ {-g,--ignorewarnings}'[whether a warning will allow a deployment to complete successfully]' \
+ {-q,--validateddeployrequestid}'[request ID of the validated deployment to run a Quick Deploy]:' \
+ --verbose'[verbose output of deploy results]' \
+ {-m,--metadata}'[comma-separated list of metadata component names]:' \
+ {-p,--sourcepath}'[comma-separated list of paths to the local source files to deploy]:' \
+ {-x,--manifest}'[file path for manifest \(package.xml\) of components to deploy]:file:_files' \
+ )
+ ;;
+ force:source:deploy:cancel)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-w,--wait}'[wait time for command to finish in minutes 33]:' \
+ {-i,--jobid}'[job ID of the deployment you want to cancel; defaults to your most recent CLI deployment if not specified]:' \
+ )
+ ;;
+ force:source:deploy:report)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-w,--wait}'[wait time for command to finish in minutes 33]:' \
+ {-i,--jobid}'[job ID of the deployment you want to check; defaults to your most recent CLI deployment if not specified]:' \
+ )
+ ;;
+ force:source:open)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-f,--sourcefile}'[file to edit]:file:_files' \
+ {-r,--urlonly}'[generate a navigation URL; don’t launch the editor]' \
+ )
+ ;;
+ force:source:pull)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-w,--wait}'[wait time for command to finish in minutes \(default: 33\)]:' \
+ {-f,--forceoverwrite}'[ignore conflict warnings and overwrite changes to the project]' \
+ )
+ ;;
+ force:source:push)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-f,--forceoverwrite}'[ignore conflict warnings and overwrite changes to scratch org]' \
+ {-g,--ignorewarnings}'[deploy changes even if warnings are generated]' \
+ {-r,--replacetokens}'[replace tokens in source files prior to deployment]' \
+ {-w,--wait}'[wait time for command to finish in minutes \(default: 33\)]:' \
+ )
+ ;;
+ force:source:retrieve)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
+ {-a,--apiversion}'[target API version for the retrieve \(default 47.0\)]:' \
+ {-w,--wait}'[wait time for command to finish in minutes]:' \
+ {-x,--manifest}'[file path for manifest \(package.xml\) of components to retrieve]:file:_files' \
+ {-m,--metadata}'[comma-separated list of metadata component names]:' \
+ {-n,--packagenames}'[a comma-separated list of packages to retrieve]:' \
+ {-p,--sourcepath}'[comma-separated list of source file paths to retrieve]:' \
+ --verbose'[verbose output of retrieve result]' \
+ )
+ ;;
+ force:source:status)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-a,--all}'[list all the changes that have been made]' \
+ {-l,--local}'[list the changes that have been made locally]' \
+ {-r,--remote}'[list the changes that have been made in the scratch org]' \
+ )
+ ;;
+ force:user:create)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-v,--targetdevhubusername}'[username or alias for the dev hub org; overrides default dev hub org]:' \
+ {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-f,--definitionfile}'[file path to a user definition]:file:_files' \
+ {-a,--setalias}'[set an alias for the created username to reference within the CLI]:' \
+ )
+ ;;
+ force:user:display)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-v,--targetdevhubusername}'[username or alias for the dev hub org; overrides default dev hub org]:' \
+ {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ )
+ ;;
+ force:user:list)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-v,--targetdevhubusername}'[username or alias for the dev hub org; overrides default dev hub org]:' \
+ {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ )
+ ;;
+ force:user:password:generate)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-v,--targetdevhubusername}'[username or alias for the dev hub org; overrides default dev hub org]:' \
+ {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-o,--onbehalfof}'[comma-separated list of usernames for which to generate passwords]:' \
+ )
+ ;;
+ force:user:permset:assign)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-u,--targetusername}'[username or alias for the target org; overrides default target org]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-n,--permsetname}'[the name of the permission set to assign]:' \
+ {-o,--onbehalfof}'[comma-separated list of usernames or aliases to assign the permission set to]:' \
+ )
+ ;;
+ force:visualforce:component:create)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-t,--template}'[template to use for file creation]:template:_values template "DefaultVFComponent"' \
+ {-d,--outputdir}'[folder for saving the created files]:outputdir:_path_files -/' \
+ {-n,--componentname}'[name of the generated Visualforce component]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-l,--label}'[Visualforce component label]:' \
+ )
+ ;;
+ force:visualforce:page:create)
+ _command_args=(
+ --json'[format output as json]' \
+ --loglevel'[logging level for this command invocation]:loglevel:_values loglevel "trace" "debug" "info" "warn" "error" "fatal" "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "FATAL"' \
+ {-t,--template}'[template to use for file creation]:template:_values template "DefaultVFPage"' \
+ {-d,--outputdir}'[folder for saving the created files]:outputdir:_path_files -/' \
+ {-n,--pagename}'[name of the generated Visualforce page]:' \
+ --apiversion'[override the api version used for api requests made by this command]:' \
+ {-l,--label}'[Visualforce page label]:' \
  )
  ;;
  esac
